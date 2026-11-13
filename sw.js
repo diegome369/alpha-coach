@@ -1,6 +1,6 @@
 // Service worker: guarda la app para que abra rápido y sin conexión.
 // Los datos (Supabase) siempre van por red.
-const CACHE = 'alpha-coach-v1';
+const CACHE = 'alpha-coach-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/apple-touch-icon.png', './vendor/supabase.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
@@ -12,7 +12,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || u.hostname.endsWith('supabase.co')) return;
   // Red primero (para recibir actualizaciones), caché si no hay conexión
   e.respondWith(fetch(e.request).then(r => {
-    if (r.ok && (u.origin === location.origin)) {
+    if ((r.ok || r.type === 'opaque') && (u.origin === location.origin || u.hostname === 'raw.githubusercontent.com')) {
       const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy));
     }
     return r;
