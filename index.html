@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b0d12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alpha Coach">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>Alpha Coach</title>
+<style>
+:root{
+  --bg:#0b0d12; --card:#151922; --card2:#1c2230; --line:#262d3b; --ink:#eef1f6; --ink2:#a7b0c0; --ink3:#6b7488;
+  --acc:#3d7bf7; --acc2:#2b5fd0; --ok:#2fb67c; --warn:#e8a33d; --bad:#e5534b;
+  --r:14px; --safe-b:env(safe-area-inset-bottom); --safe-t:env(safe-area-inset-top);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,Segoe UI,Roboto,sans-serif}
+body{min-height:100dvh;padding-top:var(--safe-t)}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:rgba(11,13,18,.92);backdrop-filter:blur(12px);padding:12px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:-.01em}
+.pill{background:var(--card2);color:var(--ink2);border-radius:999px;padding:4px 10px;font-size:13px;white-space:nowrap}
+main{padding:14px 14px calc(150px + var(--safe-b));max-width:720px;margin:0 auto}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:rgba(17,20,27,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + var(--safe-b))}
+nav.tabs button{flex:1;background:none;border:0;color:var(--ink3);padding:6px 0;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button.on{color:var(--acc)}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;border:1px solid var(--line)}
+.card h2{margin:0 0 4px;font-size:17px}
+.card h3{margin:0;font-size:16px}
+.muted{color:var(--ink2)} .dim{color:var(--ink3);font-size:13px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.btn{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#06140d}
+.btn.bad{color:var(--bad)}
+.btn.sm{padding:6px 10px;font-size:14px;border-radius:10px}
+.btn.block{width:100%;display:block}
+.btn:disabled{opacity:.5}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.item{display:flex;align-items:center;gap:10px;background:var(--card2);border-radius:12px;padding:10px 12px}
+.tag{font-size:12px;color:var(--ink2);background:#0f131a;border-radius:6px;padding:2px 7px}
+.target{background:#0f1524;border:1px solid #1f2d4d;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:14px}
+.target b{color:#cfe0ff}
+.sets{width:100%;border-collapse:collapse;margin-top:6px;table-layout:fixed}
+.sets col.cn{width:26px}.sets col.cc{width:48px}.sets col.ci{width:22%}
+.sets th{font-size:12px;color:var(--ink3);font-weight:500;text-align:left;padding:4px 4px}
+.sets td{padding:3px 4px}
+.sets input,.sets select{width:100%;-webkit-appearance:none;appearance:none;background:#0f131a;border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center;font-variant-numeric:tabular-nums}
+.sets tr.done input,.sets tr.done select{background:#0f2219;border-color:#1d4d36}
+.sets .n{width:28px;color:var(--ink3);text-align:center;font-size:14px}
+.chk{width:40px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card2);display:grid;place-items:center}
+.chk.done{background:var(--ok);border-color:var(--ok);color:#06140d}
+input.txt,select.txt,textarea.txt{width:100%;background:#0f131a;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+label.f{display:block;font-size:13px;color:var(--ink2);margin:10px 0 4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bar{height:8px;border-radius:4px;background:var(--acc)}
+.bartrack{background:#0f131a;border-radius:4px;flex:1;height:8px;overflow:hidden}
+.timer{position:fixed;left:12px;right:12px;bottom:calc(70px + var(--safe-b));z-index:7;background:#13203a;border:1px solid #2a3f6a;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.timer .t{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;min-width:74px}
+.timer.fin{background:#123222;border-color:#2a6a4a}
+.toast{position:fixed;left:50%;top:calc(14px + var(--safe-t));transform:translateX(-50%);z-index:20;background:#222a38;border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-size:14px;max-width:92vw}
+.toast.err{background:#3a1c1c;border-color:#6b2a2a}
+.modal{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.6);display:flex;align-items:flex-end}
+.sheet{background:var(--card);width:100%;max-height:88dvh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + var(--safe-b))}
+.chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.chart text{fill:var(--ink3);font-size:11px}
+.tip{font-size:13px;color:var(--ink2);min-height:18px;margin-top:4px}
+.seg{display:flex;background:#0f131a;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;padding:7px;border-radius:8px;color:var(--ink2)}
+.seg button.on{background:var(--card2);color:var(--ink)}
+.empty{text-align:center;padding:30px 10px;color:var(--ink2)}
+details summary{cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+.center{text-align:center}
+.spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:s 1s linear infinite;margin:40px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header><h1 id="title">Alpha Coach</h1><span class="pill" id="weekpill" hidden></span><button class="btn sm" id="refresh" title="Actualizar" aria-label="Actualizar">↻</button></header>
+<main id="main"><div class="spin"></div></main>
+<div id="timerSlot"></div>
+<nav class="tabs" id="tabs" hidden>
+  <button data-tab="entrenar" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Entrenar</button>
+  <button data-tab="rutinas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Rutinas</button>
+  <button data-tab="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16M6 15l4-4 3 3 5-6"/></svg>Progreso</button>
+  <button data-tab="ejercicios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg>Ejercicios</button>
+</nav>
+
+<script type="module">
+import { createClient } from './vendor/supabase.js';
+
+// ---------- utilidades ----------
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const kg = v => v == null ? '–' : (Math.round(v * 100) / 100).toString().replace('.', ',');
+const num = v => { if (v === '' || v == null) return null; const n = Number(String(v).replace(',', '.')); return isNaN(n) ? null : n; };
+const fecha = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+const store = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+function toast(msg, err) {
+  const t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), err ? 4500 : 2200);
+}
+
+// ---------- configuración / sesión ----------
+let sb = null;
+const cfg = () => store.get('ac_cfg');
+// Permite configurar con un enlace: index.html?url=...&key=...
+(() => {
+  const p = new URLSearchParams(location.search);
+  if (p.get('url') && p.get('key')) { store.set('ac_cfg', { url: p.get('url').trim(), key: p.get('key').trim() }); history.replaceState(null, '', location.pathname); }
+})();
+
+async function rpc(fn, args = {}) {
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) { toast(error.message || 'Error', true); throw error; }
+  return data;
+}
+
+function screenConfig() {
+  $('#tabs').hidden = true; $('#weekpill').hidden = true;
+  const c = cfg() || {};
+  $('#main').innerHTML = `
+    <div class="card"><h2>Conectar la app</h2>
+      <p class="muted">Pega los datos de tu proyecto de Supabase (Settings → API Keys). Solo se hace una vez.</p>
+      <label class="f">URL del proyecto</label><input class="txt" id="cu" placeholder="https://xxxx.supabase.co" value="${esc(c.url)}" autocapitalize="off" autocorrect="off">
+      <label class="f">Publishable key</label><input class="txt" id="ck" placeholder="sb_publishable_..." value="${esc(c.key)}" autocapitalize="off" autocorrect="off">
+      <div style="height:12px"></div><button class="btn pri block" id="cs">Guardar</button></div>`;
+  $('#cs').onclick = () => {
+    const url = $('#cu').value.trim().replace(/\/+$/, ''), key = $('#ck').value.trim();
+    if (!/^https:\/\/.+/.test(url) || !key) return toast('Revisa la URL y la llave', true);
+    store.set('ac_cfg', { url, key }); boot();
+  };
+}
+
+function screenLogin() {
+  $('#tabs').hidden = true; $('#weekpill').hidden = true;
+  $('#main').innerHTML = `
+    <div class="card"><h2>Iniciar sesión</h2>
+      <label class="f">Correo</label><input class="txt" id="le" type="email" autocomplete="username" autocapitalize="off">
+      <label class="f">Contraseña</label><input class="txt" id="lp" type="password" autocomplete="current-password">
+      <div style="height:12px"></div><button class="btn pri block" id="lb">Entrar</button>
+      <div style="height:8px"></div><button class="btn block" id="lc">Cambiar proyecto</button></div>`;
+  $('#lb').onclick = async () => {
+    const { error } = await sb.auth.signInWithPassword({ email: $('#le').value.trim(), password: $('#lp').value });
+    if (error) return toast(error.message, true);
+    start();
+  };
+  $('#lc').onclick = () => { localStorage.removeItem('ac_cfg'); screenConfig(); };
+}
+
+async function boot() {
+  const c = cfg();
+  if (!c) return screenConfig();
+  sb = createClient(c.url, c.key, { auth: { persistSession: true, autoRefreshToken: true } });
+  const { data } = await sb.auth.getSession();
+  if (!data.session) return screenLogin();
+  start();
+}
+
+// ---------- navegación ----------
+let tab = 'entrenar';
+const views = {};
+function start() {
+  $('#tabs').hidden = false;
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
+  $('#refresh').onclick = () => render();
+  go(store.get('ac_tab') || 'entrenar');
+}
+function go(t) {
+  tab = t; store.set('ac_tab', t);
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  window.scrollTo(0, 0); render();
+}
+async function render() {
+  if (!sb) return;
+  try { await views[tab](); } catch (e) { console.error(e); }
+}
+// Si ChatGPT cambió algo, se ve al volver a la app
+document.addEventListener('visibilitychange', () => { if (!document.hidden && sb && !$('#tabs').hidden && !document.activeElement?.matches('input,select,textarea')) render(); });
+
+async function setWeekPill() {
+  const r = await rpc('resumen', { p_dias: 7 });
+  const ra = r.rutina_activa;
+  $('#weekpill').hidden = !ra;
+  if (ra) $('#weekpill').textContent = `Semana ${ra.semana_actual}/${ra.semanas}`;
+  return r;
+}
+
+// ================= ENTRENAR =================
+views.entrenar = async () => {
+  $('#title').textContent = 'Entrenar';
+  const res = await setWeekPill();
+  if (res.entrenamiento_en_curso) return workoutView(res.entrenamiento_en_curso);
+  const rut = await rpc('ver_rutina', {});
+  const grupos = Object.entries(res.series_por_grupo || {});
+  const maxG = Math.max(1, ...grupos.map(g => g[1]));
+  $('#main').innerHTML = `
+    ${rut.error ? `<div class="card"><h2>Sin rutina activa</h2><p class="muted">Pídele a tu GPT que arme una, o créala en Rutinas.</p></div>` : `
+    <div class="card"><div class="row between"><div class="grow"><h2>${esc(rut.nombre)}</h2>
+      <div class="dim">${esc(rut.objetivo || '')} · Semana ${rut.semana_actual} de ${rut.semanas}${rut.deload_final && rut.semana_actual >= rut.semanas ? ' · Descarga' : ''}</div></div></div>
+      <div class="list">${rut.dias.map(d => `
+        <div class="item"><div class="grow"><b>${esc(d.nombre)}</b><div class="dim">${d.ejercicios.map(e => esc(e.ejercicio)).join(' · ')}</div></div>
+        <button class="btn pri sm" data-start="${d.id}">Empezar</button></div>`).join('')}</div></div>`}
+    <button class="btn block" id="free">Entrenamiento libre</button>
+    <div style="height:12px"></div>
+    <div class="card"><h3>Últimos 7 días</h3><div class="dim">${res.entrenamientos} entrenamientos · ${kg(res.volumen_kg)} kg de volumen</div>
+      <div class="list">${grupos.length ? grupos.map(([g, n]) => `<div class="row"><span style="width:96px" class="muted">${esc(g)}</span><div class="bartrack"><div class="bar" style="width:${(n / maxG) * 100}%"></div></div><span style="width:28px;text-align:right">${n}</span></div>`).join('') : '<div class="dim">Aún no hay series esta semana.</div>'}</div>
+      <div class="dim" style="margin-top:8px">Series efectivas por grupo muscular</div></div>`;
+  document.querySelectorAll('[data-start]').forEach(b => b.onclick = async () => {
+    b.disabled = true; const w = await rpc('iniciar_entrenamiento', { p_dia_id: Number(b.dataset.start) }); workoutView(w.id, w);
+  });
+  $('#free').onclick = async () => { const w = await rpc('iniciar_entrenamiento', {}); workoutView(w.id, w); };
+};
+
+async function workoutView(id, data) {
+  const w = data || await rpc('ver_entrenamiento', { p_entrenamiento_id: id });
+  $('#title').textContent = w.dia || 'Entrenamiento';
+  const drafts = store.get('ac_draft_' + w.id) || {};
+  $('#main').innerHTML = `
+    <div class="dim" style="margin:0 2px 10px">${fecha(w.fecha)}${w.semana ? ' · Semana ' + w.semana : ''}</div>
+    ${w.ejercicios.map((e, i) => exerciseCard(e, i, drafts)).join('') || '<div class="empty">Agrega un ejercicio para empezar.</div>'}
+    <button class="btn block" id="addEx">+ Agregar ejercicio</button>
+    <div style="height:10px"></div>
+    <textarea class="txt" id="wnotes" rows="2" placeholder="Notas del entrenamiento">${esc(w.notas || '')}</textarea>
+    <div style="height:10px"></div>
+    <button class="btn ok block" id="finish">Terminar entrenamiento</button>
+    <div style="height:8px"></div>
+    <button class="btn bad block sm" id="discard">Descartar entrenamiento</button>`;
+
+  const saveDraft = () => {
+    const d = {};
+    document.querySelectorAll('tr[data-pending]').forEach(tr => {
+      d[tr.dataset.key] = { p: tr.querySelector('.p').value, r: tr.querySelector('.r').value, i: tr.querySelector('.i').value };
+    });
+    store.set('ac_draft_' + w.id, d);
+  };
+  document.querySelectorAll('tr[data-pending] input, tr[data-pending] select').forEach(el => el.oninput = saveDraft);
+
+  bindLog(w);
+  document.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = () => editSet(Number(btn.dataset.edit), w.id));
+  document.querySelectorAll('[data-more]').forEach(btn => btn.onclick = () => {
+    const i = Number(btn.dataset.more), tb = btn.closest('.card').querySelector('tbody'), e = w.ejercicios[i];
+    const last = e.series[e.series.length - 1];
+    tb.insertAdjacentHTML('beforeend', pendingRow(e, i, tb.querySelectorAll('tr').length + 1, 'x' + Date.now(),
+      { p: last?.peso_kg ?? e.objetivo?.peso_kg ?? '', r: last?.reps ?? e.objetivo?.reps_objetivo ?? '', i: last?.rir ?? e.objetivo?.rir_objetivo ?? '' }));
+    bindLog(w);
+  });
+  $('#addEx').onclick = () => pickExercise(ej => {
+    // Ejercicio extra: queda guardado al registrar su primera serie
+    w.ejercicios.push({ ejercicio_id: ej.id, dia_ejercicio_id: null, ejercicio: ej.nombre, grupo: ej.grupo, descanso_seg: 120, objetivo: null, series: [] });
+    workoutView(w.id, w);
+  });
+  $('#finish').onclick = async () => {
+    const r = await rpc('finalizar_entrenamiento', { p_entrenamiento_id: w.id, p_notas: $('#wnotes').value || null });
+    localStorage.removeItem('ac_draft_' + w.id); stopTimer();
+    toast(`Listo: ${r.series} series · ${kg(r.volumen_kg)} kg · ${r.duracion_min} min`);
+    render();
+  };
+  $('#discard').onclick = async () => {
+    if (!confirm('¿Descartar este entrenamiento y sus series?')) return;
+    await rpc('eliminar_entrenamiento', { p_entrenamiento_id: w.id }); localStorage.removeItem('ac_draft_' + w.id); stopTimer(); render();
+  };
+}
+function bindLog(w) {
+  document.querySelectorAll('[data-log]').forEach(btn => { if (btn.onclick) return; btn.onclick = async () => {
+    const tr = btn.closest('tr'); const e = w.ejercicios[Number(tr.dataset.ex)];
+    const peso = num(tr.querySelector('.p').value), reps = num(tr.querySelector('.r').value), rir = num(tr.querySelector('.i').value);
+    if (reps == null) return toast('Escribe las repeticiones', true);
+    btn.disabled = true;
+    try {
+      await rpc('registrar_series', { p_entrenamiento_id: w.id, p_series: [{ ejercicio_id: e.ejercicio_id, dia_ejercicio_id: e.dia_ejercicio_id, peso_kg: peso ?? 0, reps, rir }] });
+    } catch { btn.disabled = false; return; }
+    const d = store.get('ac_draft_' + w.id) || {}; delete d[tr.dataset.key]; store.set('ac_draft_' + w.id, d);
+    startTimer(e.descanso_seg || 120, e.ejercicio);
+    workoutView(w.id);
+  }; });
+}
+const rirOpts = sel => ['', 0, 1, 2, 3, 4, 5].map(v => `<option value="${v}" ${String(sel) === String(v) ? 'selected' : ''}>${v === '' ? '–' : v}</option>`).join('');
+function pendingRow(e, i, n, key, v) {
+  return `<tr data-pending data-ex="${i}" data-key="${key}">
+    <td class="n">${n}</td>
+    <td><input class="p" inputmode="decimal" value="${esc(v.p)}" placeholder="kg"></td>
+    <td><input class="r" inputmode="numeric" value="${esc(v.r)}" placeholder="reps"></td>
+    <td><select class="i">${rirOpts(v.i)}</select></td>
+    <td><button class="chk" data-log aria-label="Guardar serie">✓</button></td></tr>`;
+}
+function exerciseCard(e, i, drafts) {
+  const o = e.objetivo;
+  const total = o ? o.series : Math.max(e.series.length + 1, 1);
+  const rows = e.series.map((s, k) => `<tr class="done"><td class="n">${k + 1}</td>
+      <td><input value="${kg(s.peso_kg)}" readonly></td><td><input value="${s.reps ?? ''}" readonly></td>
+      <td><input value="${s.rir ?? '–'}" readonly></td>
+      <td><button class="chk done" data-edit="${s.id}" aria-label="Editar serie">✓</button></td></tr>`);
+  for (let k = e.series.length; k < total; k++) {
+    const key = `${e.ejercicio_id}_${k}`; const d = drafts[key];
+    rows.push(pendingRow(e, i, k + 1, key, d || { p: o?.peso_kg ?? e.series[e.series.length - 1]?.peso_kg ?? '', r: o?.reps_objetivo ?? '', i: o?.rir_objetivo ?? '' }));
+  }
+  return `<div class="card"><div class="row between"><h3 class="grow">${esc(e.ejercicio)}</h3><span class="tag">${esc(e.grupo)}</span></div>
+    ${o ? `<div class="target"><b>${o.peso_kg != null ? kg(o.peso_kg) + ' kg × ' : ''}${o.reps_objetivo} reps @ RIR ${o.rir_objetivo}</b> · ${o.series} series · rango ${o.reps_min}-${o.reps_max}
+      <div class="dim" style="margin-top:3px">${esc(o.motivo)}</div>
+      ${o.ultima_sesion ? `<div class="dim">Última vez (${fecha(o.ultima_sesion.fecha)}): ${o.ultima_sesion.series.map(s => `${kg(s.peso_kg)}×${s.reps}`).join(', ')}</div>` : ''}</div>` : ''}
+    ${e.notas ? `<div class="dim">${esc(e.notas)}</div>` : ''}
+    <table class="sets"><colgroup><col class="cn"><col><col><col class="ci"><col class="cc"></colgroup><thead><tr><th></th><th>kg</th><th>reps</th><th>RIR</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>
+    <div style="height:6px"></div><button class="btn sm" data-more="${i}">+ Serie</button></div>`;
+}
+
+function editSet(id, wid) {
+  modal(`<h2>Editar serie</h2>
+    <div class="grid2"><div><label class="f">kg</label><input class="txt" id="ep" inputmode="decimal"></div><div><label class="f">reps</label><input class="txt" id="er" inputmode="numeric"></div></div>
+    <label class="f">RIR</label><select class="txt" id="ei">${rirOpts('')}</select>
+    <div style="height:14px"></div><button class="btn pri block" id="es">Guardar</button><div style="height:8px"></div>
+    <button class="btn bad block" id="ed">Borrar serie</button>`, m => {
+    m.querySelector('#es').onclick = async () => {
+      await rpc('editar_serie', { p_serie_id: id, p_peso_kg: num(m.querySelector('#ep').value), p_reps: num(m.querySelector('#er').value), p_rir: num(m.querySelector('#ei').value) });
+      closeModal(); workoutView(wid);
+    };
+    m.querySelector('#ed').onclick = async () => { await rpc('eliminar_serie', { p_serie_id: id }); closeModal(); workoutView(wid); };
+  });
+}
+
+// ---------- temporizador de descanso ----------
+let timer = null;
+function beep() {
+  try { const a = new (window.AudioContext || window.webkitAudioContext)(); [0, .25, .5].forEach(t => { const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 880; o.connect(g); g.connect(a.destination); g.gain.setValueAtTime(.25, a.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + t + .2);
+    o.start(a.currentTime + t); o.stop(a.currentTime + t + .2); }); } catch {}
+  try { navigator.vibrate?.([200, 100, 200]); } catch {}
+}
+function startTimer(sec, name) {
+  stopTimer();
+  timer = { end: Date.now() + sec * 1000, name, done: false };
+  $('#timerSlot').innerHTML = `<div class="timer" id="tm"><div class="t" id="tt"></div><div class="grow"><div class="dim">Descanso</div><div style="font-size:14px">${esc(name)}</div></div>
+    <button class="btn sm" id="tminus">−15</button><button class="btn sm" id="tplus">+15</button><button class="btn sm" id="tskip">✕</button></div>`;
+  $('#tminus').onclick = () => timer.end -= 15000; $('#tplus').onclick = () => timer.end += 15000; $('#tskip').onclick = stopTimer;
+  timer.iv = setInterval(tick, 250); tick();
+}
+function tick() {
+  if (!timer) return;
+  const left = Math.round((timer.end - Date.now()) / 1000);
+  const el = $('#tt'); if (!el) return;
+  el.textContent = (left < 0 ? '+' : '') + Math.floor(Math.abs(left) / 60) + ':' + String(Math.abs(left) % 60).padStart(2, '0');
+  if (left <= 0 && !timer.done) { timer.done = true; $('#tm').classList.add('fin'); beep(); }
+}
+function stopTimer() { if (timer) clearInterval(timer.iv); timer = null; $('#timerSlot').innerHTML = ''; }
+
+// ---------- modal ----------
+function modal(html, bind) {
+  closeModal();
+  const m = document.createElement('div'); m.className = 'modal'; m.id = 'modal';
+  m.innerHTML = `<div class="sheet">${html}</div>`;
+  m.onclick = ev => { if (ev.target === m) closeModal(); };
+  document.body.appendChild(m); bind?.(m);
+}
+function closeModal() { $('#modal')?.remove(); }
+
+let ejCache = null;
+async function ejercicios() { if (!ejCache) ejCache = await rpc('listar_ejercicios', {}); return ejCache; }
+async function pickExercise(cb) {
+  const all = await ejercicios();
+  modal(`<h2>Elegir ejercicio</h2><input class="txt" id="pq" placeholder="Buscar…" autocapitalize="off"><div class="list" id="pl"></div>
+    <div style="height:10px"></div><button class="btn block" id="pn">+ Crear ejercicio nuevo</button>`, m => {
+    const draw = q => { m.querySelector('#pl').innerHTML = all.filter(e => !q || e.nombre.toLowerCase().includes(q.toLowerCase())).slice(0, 60)
+      .map(e => `<div class="item" data-id="${e.id}"><div class="grow">${esc(e.nombre)}</div><span class="tag">${esc(e.grupo)}</span></div>`).join('');
+      m.querySelectorAll('[data-id]').forEach(it => it.onclick = () => { closeModal(); cb(all.find(e => e.id == it.dataset.id)); }); };
+    draw(''); m.querySelector('#pq').oninput = ev => draw(ev.target.value);
+    m.querySelector('#pn').onclick = () => newExercise(ej => cb(ej));
+  });
+}
+const GRUPOS = ['pecho','espalda','hombros','biceps','triceps','cuadriceps','isquios','gluteos','pantorrillas','abdomen','trapecio','antebrazos','otro'];
+function newExercise(cb) {
+  modal(`<h2>Nuevo ejercicio</h2><label class="f">Nombre</label><input class="txt" id="nn">
+    <label class="f">Grupo muscular</label><select class="txt" id="ng">${GRUPOS.map(g => `<option>${g}</option>`).join('')}</select>
+    <label class="f">Equipo</label><input class="txt" id="ne" placeholder="barra, mancuernas, máquina…">
+    <div style="height:14px"></div><button class="btn pri block" id="ns">Crear</button>`, m => {
+    m.querySelector('#ns').onclick = async () => {
+      const n = m.querySelector('#nn').value.trim(); if (!n) return toast('Escribe un nombre', true);
+      const ej = await rpc('crear_ejercicio', { p_nombre: n, p_grupo: m.querySelector('#ng').value, p_equipo: m.querySelector('#ne').value || null });
+      ejCache = null; closeModal(); cb?.(ej);
+    };
+  });
+}
+
+// ================= RUTINAS =================
+views.rutinas = async () => {
+  $('#title').textContent = 'Rutinas'; await setWeekPill();
+  const list = await rpc('listar_rutinas', {});
+  $('#main').innerHTML = `${list.length ? list.map(r => `
+    <div class="card" data-r="${r.id}"><div class="row between"><div class="grow"><h2>${esc(r.nombre)}</h2>
+      <div class="dim">${esc(r.objetivo || '')} ${r.semanas} semanas · ${r.dias.length} días</div></div>${r.activa ? '<span class="pill" style="color:var(--acc)">Activa</span>' : ''}</div></div>`).join('')
+    : '<div class="empty">No tienes rutinas. Crea una o pídesela a tu GPT.</div>'}
+    <button class="btn pri block" id="newR">+ Nueva rutina</button>`;
+  document.querySelectorAll('[data-r]').forEach(c => c.onclick = () => routineView(Number(c.dataset.r)));
+  $('#newR').onclick = () => routineEditor({ nombre: '', objetivo: 'hipertrofia', semanas: 5, rir_por_semana: [3, 2, 2, 1], deload_final: true, activa: true, dias: [{ nombre: 'Día 1', ejercicios: [] }] });
+};
+
+async function routineView(id) {
+  const r = await rpc('ver_rutina', { p_rutina_id: id });
+  $('#title').textContent = r.nombre;
+  $('#main').innerHTML = `
+    <div class="card"><div class="dim">${esc(r.objetivo || '')} · ${r.semanas} semanas · RIR por semana: ${r.rir_por_semana.join(', ')}${r.deload_final ? ' · última de descarga' : ''}</div>
+      <div style="height:10px"></div>
+      <div class="row"><span class="grow">Semana actual</span><button class="btn sm" id="wm">−</button><b style="min-width:52px;text-align:center">${r.semana_actual}/${r.semanas}</b><button class="btn sm" id="wp">+</button></div>
+      <div style="height:10px"></div>
+      ${r.activa ? '<div class="dim">Esta es tu rutina activa.</div>' : '<button class="btn pri block" id="act">Activar rutina</button>'}</div>
+    ${r.dias.map(d => `<div class="card"><h3>${esc(d.nombre)}</h3><div class="list">${d.ejercicios.map(e => `
+      <div class="item"><div class="grow">${esc(e.ejercicio)}<div class="dim">${e.series} × ${e.reps_min}-${e.reps_max}${e.rir != null ? ' @RIR ' + e.rir : ''} · descanso ${Math.round(e.descanso_seg / 60 * 10) / 10} min · +${kg(e.incremento_kg)} kg</div></div></div>`).join('') || '<div class="dim">Sin ejercicios</div>'}</div></div>`).join('')}
+    <div class="grid2"><button class="btn" id="back">← Volver</button><button class="btn" id="edit">Editar</button></div>
+    <div style="height:8px"></div><button class="btn bad block sm" id="del">Eliminar rutina</button>`;
+  const setW = async s => { await rpc('cambiar_semana', { p_semana: s, p_rutina_id: id }); routineView(id); setWeekPill(); };
+  $('#wm').onclick = () => setW(Math.max(1, r.semana_actual - 1));
+  $('#wp').onclick = () => setW(Math.min(r.semanas, r.semana_actual + 1));
+  if ($('#act')) $('#act').onclick = async () => { await rpc('activar_rutina', { p_rutina_id: id }); routineView(id); setWeekPill(); };
+  $('#back').onclick = () => views.rutinas();
+  $('#edit').onclick = () => routineEditor(r);
+  $('#del').onclick = async () => { if (!confirm('¿Eliminar la rutina? El historial se conserva.')) return; await rpc('eliminar_rutina', { p_rutina_id: id }); views.rutinas(); };
+}
+
+function routineEditor(r0) {
+  const r = JSON.parse(JSON.stringify(r0));
+  $('#title').textContent = r.id ? 'Editar rutina' : 'Nueva rutina';
+  const draw = () => {
+    $('#main').innerHTML = `
+      <div class="card"><label class="f">Nombre</label><input class="txt" id="rn" value="${esc(r.nombre)}">
+        <div class="grid2"><div><label class="f">Objetivo</label><input class="txt" id="ro" value="${esc(r.objetivo || '')}"></div>
+        <div><label class="f">Semanas</label><input class="txt" id="rs" inputmode="numeric" value="${r.semanas}"></div></div>
+        <label class="f">RIR por semana (separado por comas)</label><input class="txt" id="rr" value="${esc((r.rir_por_semana || []).join(', '))}">
+        <label class="row" style="margin-top:10px"><input type="checkbox" id="rd" ${r.deload_final ? 'checked' : ''}> <span>Última semana de descarga</span></label></div>
+      ${r.dias.map((d, i) => `<div class="card"><div class="row"><input class="txt grow" data-dn="${i}" value="${esc(d.nombre)}"><button class="btn sm bad" data-dd="${i}">✕</button></div>
+        <div class="list">${d.ejercicios.map((e, j) => `<div class="item" style="flex-wrap:wrap"><div class="grow"><b>${esc(e.ejercicio)}</b></div>
+          <button class="btn sm" data-up="${i}_${j}">↑</button><button class="btn sm bad" data-de="${i}_${j}">✕</button>
+          <div class="grid4" style="width:100%">
+            <div><div class="dim">Series</div><input class="txt" data-f="series" data-k="${i}_${j}" inputmode="numeric" value="${e.series}"></div>
+            <div><div class="dim">Reps mín</div><input class="txt" data-f="reps_min" data-k="${i}_${j}" inputmode="numeric" value="${e.reps_min}"></div>
+            <div><div class="dim">Reps máx</div><input class="txt" data-f="reps_max" data-k="${i}_${j}" inputmode="numeric" value="${e.reps_max}"></div>
+            <div><div class="dim">Desc. (s)</div><input class="txt" data-f="descanso_seg" data-k="${i}_${j}" inputmode="numeric" value="${e.descanso_seg}"></div>
+          </div></div>`).join('')}</div>
+        <div style="height:8px"></div><button class="btn sm" data-add="${i}">+ Ejercicio</button></div>`).join('')}
+      <button class="btn block" id="addD">+ Día</button><div style="height:10px"></div>
+      <div class="grid2"><button class="btn" id="cancel">Cancelar</button><button class="btn pri" id="save">Guardar</button></div>`;
+    const sync = () => {
+      r.nombre = $('#rn').value; r.objetivo = $('#ro').value; r.semanas = num($('#rs').value) || 4;
+      r.rir_por_semana = $('#rr').value.split(/[,\s]+/).map(num).filter(v => v != null); r.deload_final = $('#rd').checked;
+      document.querySelectorAll('[data-dn]').forEach(el => r.dias[el.dataset.dn].nombre = el.value);
+      document.querySelectorAll('[data-f]').forEach(el => { const [i, j] = el.dataset.k.split('_'); r.dias[i].ejercicios[j][el.dataset.f] = num(el.value); });
+    };
+    document.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => { sync(); r.dias.splice(b.dataset.dd, 1); draw(); });
+    document.querySelectorAll('[data-de]').forEach(b => b.onclick = () => { sync(); const [i, j] = b.dataset.de.split('_'); r.dias[i].ejercicios.splice(j, 1); draw(); });
+    document.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { sync(); const [i, j] = b.dataset.up.split('_').map(Number); if (j > 0) { const a = r.dias[i].ejercicios; [a[j - 1], a[j]] = [a[j], a[j - 1]]; } draw(); });
+    document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => { sync(); pickExercise(ej => { r.dias[b.dataset.add].ejercicios.push({ ejercicio_id: ej.id, ejercicio: ej.nombre, series: 3, reps_min: 8, reps_max: 12, descanso_seg: 120, incremento_kg: 2.5 }); draw(); }); });
+    $('#addD').onclick = () => { sync(); r.dias.push({ nombre: 'Día ' + (r.dias.length + 1), ejercicios: [] }); draw(); };
+    $('#cancel').onclick = () => r.id ? routineView(r.id) : views.rutinas();
+    $('#save').onclick = async () => {
+      sync(); if (!r.nombre.trim()) return toast('Ponle un nombre', true);
+      const payload = { id: r.id, nombre: r.nombre, objetivo: r.objetivo, semanas: r.semanas, rir_por_semana: r.rir_por_semana, deload_final: r.deload_final,
+        activa: r.id ? r.activa : true,
+        dias: r.dias.map(d => ({ nombre: d.nombre, ejercicios: d.ejercicios.map(e => ({ ejercicio_id: e.ejercicio_id, series: e.series, reps_min: e.reps_min, reps_max: e.reps_max, rir: e.rir ?? null, descanso_seg: e.descanso_seg, incremento_kg: e.incremento_kg ?? 2.5, notas: e.notas ?? null })) })) };
+      const saved = await rpc('guardar_rutina', { p_rutina: payload });
+      toast('Rutina guardada'); routineView(saved.id);
+    };
+  };
+  draw();
+}
+
+// ================= PROGRESO =================
+function lineChart(points, unit) {
+  // points: [{x: label, y: number}] — una serie, sin leyenda (el título la nombra)
+  if (points.length < 2) return '<div class="dim">Necesitas al menos 2 registros para ver la gráfica.</div>';
+  const W = 340, H = 170, L = 36, R = 10, T = 12, B = 22;
+  const ys = points.map(p => p.y); let lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.15 || 1; lo -= pad; hi += pad;
+  const X = i => L + (i / (points.length - 1)) * (W - L - R), Y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const ticks = [lo + pad, (lo + hi) / 2, hi - pad];
+  const d = points.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(p.y).toFixed(1)}`).join('');
+  const id = 'c' + Math.random().toString(36).slice(2, 8);
+  setTimeout(() => {
+    const svg = document.getElementById(id); if (!svg) return; const tip = svg.nextElementSibling; const dot = svg.querySelector('.hov');
+    const show = ev => { const r = svg.getBoundingClientRect(); const cx = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(points.length - 1, Math.round((cx - L) / (W - L - R) * (points.length - 1))));
+      dot.setAttribute('cx', X(i)); dot.setAttribute('cy', Y(points[i].y)); dot.style.display = '';
+      tip.textContent = `${points[i].x}: ${kg(points[i].y)} ${unit}`; };
+    svg.addEventListener('pointermove', show); svg.addEventListener('pointerdown', show); svg.addEventListener('touchmove', show, { passive: true });
+  });
+  return `<svg class="chart" id="${id}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de ${unit}">
+    ${ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}" stroke="#262d3b" stroke-width="1"/><text x="${L - 6}" y="${Y(t) + 4}" text-anchor="end">${Math.round(t)}</text>`).join('')}
+    <text x="${L}" y="${H - 4}">${esc(points[0].x)}</text><text x="${W - R}" y="${H - 4}" text-anchor="end">${esc(points[points.length - 1].x)}</text>
+    <path d="${d}" fill="none" stroke="#3d7bf7" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${points.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.y)}" r="4" fill="#3d7bf7" stroke="#151922" stroke-width="2"/>`).join('')}
+    <circle class="hov" r="7" fill="none" stroke="#eef1f6" stroke-width="2" style="display:none"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/></svg><div class="tip">Toca la gráfica para ver cada punto</div>`;
+}
+
+let progTab = store.get('ac_prog') || 'ejercicio';
+views.progreso = async () => {
+  $('#title').textContent = 'Progreso'; await setWeekPill();
+  $('#main').innerHTML = `<div class="seg" style="margin-bottom:12px">
+      <button data-p="ejercicio">Ejercicio</button><button data-p="historial">Historial</button><button data-p="peso">Peso corporal</button></div><div id="pv"><div class="spin"></div></div>`;
+  document.querySelectorAll('[data-p]').forEach(b => { b.classList.toggle('on', b.dataset.p === progTab); b.onclick = () => { progTab = b.dataset.p; store.set('ac_prog', progTab); views.progreso(); }; });
+  if (progTab === 'ejercicio') return progEjercicio();
+  if (progTab === 'historial') return progHistorial();
+  return progPeso();
+};
+async function progEjercicio() {
+  const sel = store.get('ac_progEj');
+  if (!sel) { $('#pv').innerHTML = `<div class="empty">Elige un ejercicio para ver su evolución.</div><button class="btn pri block" id="pe">Elegir ejercicio</button>`;
+    $('#pe').onclick = () => pickExercise(ej => { store.set('ac_progEj', ej.id); views.progreso(); }); return; }
+  const p = await rpc('progreso_ejercicio', { p_ejercicio_id: sel });
+  const s = p.sesiones;
+  $('#pv').innerHTML = `<div class="card"><div class="row between"><h2 class="grow">${esc(p.ejercicio)}</h2><button class="btn sm" id="pe">Cambiar</button></div>
+      <div class="grid2" style="margin:8px 0"><div><div class="dim">Récord 1RM est.</div><b style="font-size:22px">${kg(p.record_e1rm)} kg</b></div><div><div class="dim">Peso máximo</div><b style="font-size:22px">${kg(p.record_peso)} kg</b></div></div>
+      <div class="dim" style="margin-bottom:4px">1RM estimado por sesión (kg)</div>
+      ${lineChart(s.map(x => ({ x: fecha(x.fecha), y: Number(x.e1rm) })), 'kg')}</div>
+    <div class="card"><h3>Sesiones</h3><table class="sets"><thead><tr><th>Fecha</th><th>Mejor serie</th><th>Series</th><th>Volumen</th></tr></thead><tbody>
+      ${s.slice().reverse().map(x => `<tr><td>${fecha(x.fecha)}</td><td>${kg(x.mejor_serie.peso_kg)}×${x.mejor_serie.reps}${x.mejor_serie.rir != null ? ' @' + x.mejor_serie.rir : ''}</td><td>${x.series}</td><td>${kg(x.volumen_kg)}</td></tr>`).join('') || '<tr><td colspan="4" class="dim">Sin registros</td></tr>'}
+    </tbody></table></div>`;
+  $('#pe').onclick = () => pickExercise(ej => { store.set('ac_progEj', ej.id); views.progreso(); });
+}
+async function progHistorial() {
+  const h = await rpc('historial', { p_limite: 30 });
+  $('#pv').innerHTML = h.length ? h.map(w => `<details class="card"><summary class="row between"><div class="grow"><b>${esc(w.dia || 'Entrenamiento')}</b><div class="dim">${fecha(w.fecha)}${w.semana ? ' · semana ' + w.semana : ''}${w.en_curso ? ' · en curso' : ''}</div></div><span class="dim">${kg(w.volumen_kg)} kg</span></summary>
+      <div class="list">${w.ejercicios.map(e => `<div><b>${esc(e.ejercicio)}</b><div class="dim">${e.series.map(s => `${kg(s.peso_kg)}×${s.reps ?? '–'}${s.rir != null ? ' @' + s.rir : ''}`).join(' · ')}</div></div>`).join('')}</div>
+      ${w.notas ? `<div class="dim" style="margin-top:8px">${esc(w.notas)}</div>` : ''}</details>`).join('') : '<div class="empty">Todavía no hay entrenamientos.</div>';
+}
+async function progPeso() {
+  const l = await rpc('listar_peso_corporal', {});
+  $('#pv').innerHTML = `<div class="card"><h3>Registrar peso de hoy</h3><div class="row" style="margin-top:8px"><input class="txt grow" id="bw" inputmode="decimal" placeholder="kg"><button class="btn pri" id="bws">Guardar</button></div></div>
+    <div class="card"><div class="dim" style="margin-bottom:4px">Peso corporal (kg)</div>${lineChart(l.map(x => ({ x: fecha(x.fecha), y: Number(x.kg) })), 'kg')}</div>
+    <div class="card"><table class="sets"><tbody>${l.slice().reverse().map(x => `<tr><td>${fecha(x.fecha)}</td><td style="text-align:right">${kg(x.kg)} kg</td></tr>`).join('') || '<tr><td class="dim">Sin registros</td></tr>'}</tbody></table></div>`;
+  $('#bws').onclick = async () => { const v = num($('#bw').value); if (!v) return toast('Escribe tu peso', true); await rpc('registrar_peso_corporal', { p_kg: v }); views.progreso(); };
+}
+
+// ================= EJERCICIOS =================
+views.ejercicios = async () => {
+  $('#title').textContent = 'Ejercicios'; await setWeekPill();
+  ejCache = null; const all = await ejercicios();
+  $('#main').innerHTML = `<input class="txt" id="eq" placeholder="Buscar ejercicio…" autocapitalize="off"><div style="height:10px"></div>
+    <div id="el"></div><button class="btn pri block" id="en">+ Nuevo ejercicio</button>`;
+  const draw = q => {
+    const f = all.filter(e => !q || e.nombre.toLowerCase().includes(q.toLowerCase()) || e.grupo.includes(q.toLowerCase()));
+    const groups = {}; f.forEach(e => (groups[e.grupo] ||= []).push(e));
+    $('#el').innerHTML = Object.entries(groups).map(([g, es]) => `<div class="card"><h3 style="text-transform:capitalize">${esc(g)}</h3><div class="list">${es.map(e => `
+      <div class="item" data-pe="${e.id}"><div class="grow">${esc(e.nombre)}<div class="dim">${esc(e.equipo || '')}${e.unilateral ? ' · unilateral' : ''}</div></div><span class="dim">›</span></div>`).join('')}</div></div>`).join('') || '<div class="empty">Sin resultados</div>';
+    document.querySelectorAll('[data-pe]').forEach(it => it.onclick = () => { store.set('ac_progEj', Number(it.dataset.pe)); progTab = 'ejercicio'; store.set('ac_prog', 'ejercicio'); go('progreso'); });
+  };
+  draw(''); $('#eq').oninput = ev => draw(ev.target.value);
+  $('#en').onclick = () => newExercise(() => views.ejercicios());
+};
+
+// ---------- arranque ----------
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+boot();
+</script>
+</body>
+</html>
