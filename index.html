@@ -18,6 +18,7 @@
   --acc:#3d7bf7; --acc2:#2b5fd0; --ok:#2fb67c; --warn:#e8a33d; --bad:#e5534b;
   --r:14px; --safe-b:env(safe-area-inset-bottom); --safe-t:env(safe-area-inset-top);
 }
+[hidden]{display:none!important}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,Segoe UI,Roboto,sans-serif}
 body{min-height:100dvh;padding-top:var(--safe-t)}
@@ -114,7 +115,9 @@ function toast(msg, err) {
 
 // ---------- configuración / sesión ----------
 let sb = null;
-const cfg = () => store.get('ac_cfg');
+// Proyecto por defecto (la publishable key es pública por diseño; los datos están protegidos por RLS)
+const DEFAULT_CFG = { url: 'https://pklkzgqatfrqmtwvtgxf.supabase.co', key: 'sb_publishable_-PX3YbjgqTMcb6h707lwkQ_sqcHmqHN' };
+const cfg = () => store.get('ac_cfg') || DEFAULT_CFG;
 // Permite configurar con un enlace: index.html?url=...&key=...
 (() => {
   const p = new URLSearchParams(location.search);
